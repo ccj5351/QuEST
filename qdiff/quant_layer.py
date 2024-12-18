@@ -198,7 +198,8 @@ class UniformAffineQuantizer(nn.Module):
             zero_point = x_max.clone()
             # determine the scale and zero point channel-by-channel
             for c in range(n_channels):
-                delta[c], zero_point[c] = self.init_quantization_scale(x_clone[c], channel_wise=False)
+                delta[c], zero_point[c] = self.init_quantization_scale(x_clone[c], 
+                                                                       channel_wise=False)
             if len(x.shape) == 4:
                 delta = delta.view(-1, 1, 1, 1)
                 zero_point = zero_point.view(-1, 1, 1, 1)
@@ -278,7 +279,8 @@ class ActUniformQuantizer(nn.Module):
     """
     Based on RepQ
     """
-    def __init__(self, n_bits: int = 8, symmetric: bool = False, channel_wise: bool = False, scale_method: str = 'max',
+    def __init__(self, n_bits: int = 8, symmetric: bool = False, 
+                 channel_wise: bool = False, scale_method: str = 'max',
                  leaf_param: bool = False, always_zero: bool = False):
         super(ActUniformQuantizer, self).__init__()
         # assert 2 <= n_bits <= 8, 'bitwidth not supported'

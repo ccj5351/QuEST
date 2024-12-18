@@ -15,7 +15,9 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 from ldm.util import instantiate_from_config
 
 from qdiff import (
-    QuantModel, QuantModule, BaseQuantBlock, QuantQKMatMul, QuantSMVMatMul, QuantBasicTransformerBlock, QuantAttentionBlock, QuantResBlock,
+    QuantModel, QuantModule, BaseQuantBlock, 
+    QuantQKMatMul, QuantSMVMatMul, QuantBasicTransformerBlock, 
+    QuantAttentionBlock, QuantResBlock,
     block_reconstruction, layer_reconstruction,
 )
 from qdiff.adaptive_rounding import AdaRoundQuantizer
@@ -44,7 +46,8 @@ def custom_to_pil(x):
 
 
 def custom_to_np(x):
-    # saves the batch in adm style as in https://github.com/openai/guided-diffusion/blob/main/scripts/image_sample.py
+    # saves the batch in adm style as 
+    # in https://github.com/openai/guided-diffusion/blob/main/scripts/image_sample.py
     sample = x.detach().cpu()
     sample = ((sample + 1) * 127.5).clamp(0, 255).to(torch.uint8)
     sample = sample.permute(0, 2, 3, 1)
@@ -77,7 +80,8 @@ def convsample(model, shape, return_intermediates=True,
 
     if not make_prog_row:
         return model.p_sample_loop(None, shape,
-                                   return_intermediates=return_intermediates, verbose=verbose)
+                                   return_intermediates=return_intermediates, 
+                                   verbose=verbose)
     else:
         return model.progressive_denoising(
             None, shape, verbose=True
@@ -122,10 +126,12 @@ def make_convolutional_sample(model, batch_size, vanilla=False, custom_steps=Non
                                         make_prog_row=True)
     elif dpm:
         logger.info(f'Using DPM sampling with {custom_steps} sampling steps and eta={eta}')
-        sample, intermediates = convsample_dpm(model,  steps=custom_steps, shape=shape,
-                                                eta=eta)
+        sample, intermediates = convsample_dpm(model,  steps=custom_steps, 
+                                               shape=shape,
+                                               eta=eta)
     else:
-        sample, intermediates = convsample_ddim(model,  steps=custom_steps, shape=shape,
+        sample, intermediates = convsample_ddim(model,  steps=custom_steps, 
+                                                shape=shape,
                                                 eta=eta)
 
     t1 = time.time()
@@ -138,8 +144,8 @@ def make_convolutional_sample(model, batch_size, vanilla=False, custom_steps=Non
     logger.info(f'Throughput for this batch: {log["throughput"]}')
     return log
 
-def run(model, logdir, batch_size=50, vanilla=False, custom_steps=None, eta=None, 
-    n_samples=50000, nplog=None, dpm=False):
+def run(model, logdir, batch_size=50, vanilla=False, custom_steps=None, 
+        eta=None, n_samples=50000, nplog=None, dpm=False):
     if vanilla:
         logger.info(f'Using Vanilla DDPM sampling with {model.num_timesteps} sampling steps.')
     else:
@@ -200,7 +206,9 @@ def get_parser():
         "--resume_base",
         type=str,
         nargs="?",
-        help="load fp32 base model from logdir or checkpoint in logdir (will deprecate after direct quantized model loading implemented)",
+        help="load fp32 base model from logdir or checkpoint " 
+            "in logdir (will deprecate after direct quantized model "
+            "loading implemented)",
     )
     parser.add_argument(
         "-n",
@@ -484,8 +492,11 @@ if __name__ == "__main__":
             print("Number of timesteps and values:", len(timesteps), timesteps)
 
             qnn = QuantModel(
-                model=model.model.diffusion_model, weight_quant_params=wq_params, act_quant_params=aq_params,
-                sm_abit=opt.sm_abit, act_quant_mode="qdiff", timewise=True, list_timesteps=timesteps)
+                model=model.model.diffusion_model, 
+                weight_quant_params = wq_params, 
+                act_quant_params = aq_params,
+                sm_abit = opt.sm_abit, act_quant_mode = "qdiff", 
+                timewise = True, list_timesteps = timesteps)
             qnn.cuda()
             qnn.eval()
 
